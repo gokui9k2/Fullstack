@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@3"></script> 
+</head>
+<body>
+    <header>
+        <h1>Dashboard UFC</h1>
+    </header>
+    
+    <main class="dashboard-container">
+        <!-- Box 1: Heatmap - Female -->
+        <div class="chart-box">
+            <h2>Heatmap - Femmes</h2>
+            <canvas id="heatmapFemaleChart" width="400" height="400"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>Heatmap - Hommes</h2>
+            <canvas id="heatmapMaleChart" width="400" height="400"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>Moyenne des coups significatifs touchés par âge et genre</h2>
+            <canvas id="lineChart" width="400" height="400"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>Pourcentage de victoire côté bleu vs côté rouge</h2>
+            <canvas id="myDoughnutChart" width="400" height="400"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>Pourcentage des différents types de finition</h2>
+            <canvas id="myPolarChart" width="400" height="400"></canvas>
+        </div>
+        <div class="chart-box map-box">
+            <h2>Les lieux les plus prisés par l'UFC</h2>
+            <canvas id="geoMapChart" width="800" height="600"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>Augmentation des événements UFC au cours des années</h2>
+            <canvas id="lineChartYear" width="800" height="600"></canvas>
+        </div>
+        <div class="data-box">
+            <h2>Disparité de genre</h2>
+            {% set gender_data = gender_disparity|tojson|safe %}
+            <script>
+                const genderData = JSON.parse({{ gender_data }});
+                document.write(`
+                    <p><strong>Nombre d'hommes :</strong> ${genderData.MALE}</p>
+                    <p><strong>Nombre de femmes :</strong> ${genderData.FEMALE}</p>
+                    <p><strong>Ratio :</strong> ${(genderData.MALE / genderData.FEMALE).toFixed(1)} hommes pour une femme</p>
+                `);
+            </script>
+        </div>
+    </main>
+
+    <!-- Passing Data from Flask to JavaScript -->
+    <script>
+        const heatmapFemaleData = {{ heatmap_female | safe }};
+        const heatmapMaleData = {{ heatmap_male | safe }}; 
+        const lineplotMaleData = {{ line_plot_male | safe }};
+        const lineplotFemaleData = {{ line_plot_female | safe }}; 
+        const ratio = {{ winner_rat | safe }};
+        const finish = {{ finish_ratio | safe }};
+        const coordinatesData = {{ coordinates | safe }};
+    </script>
+
+    <!-- Link to the external JavaScript files -->
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart_1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart_2.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart_3.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart_4.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart_5.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart_6.js') }}"></script>
+</body>
+</html>

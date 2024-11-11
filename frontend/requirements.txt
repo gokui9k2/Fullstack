@@ -1,0 +1,8 @@
+Flask
+pandas
+plotly
+numpy
+requests
+uvicorn
+gunicorn
+asgiref
