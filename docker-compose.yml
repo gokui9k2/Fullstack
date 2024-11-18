@@ -1,53 +1,79 @@
-version: '3.8'
+version: '3.8'  # Version de la syntaxe du fichier
+
 services:
-  db:
+  db: 
     image: postgres:latest
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}      # Utilisateur de la base de données
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Mot de passe de la base de données
+      POSTGRES_DB: ${POSTGRES_DB}            # Nom de la base de données
     ports:
-      - "5432:5432"
+      - "5432:5432"                          # Exposition du port 5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data # Persistance des données
     networks:
-      - app-network
+      - app-network                          # Réseau partagé
 
   api:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    restart: always
+      context: ./backend                     # Contexte de construction pour le service API
+      dockerfile: Dockerfile                 # Fichier Docker à utiliser pour construire l'image
+    restart: always                        
     environment:
-      DATABASE_URL: postgresql+psycopg2://Faker:nigGaTHEcops987@db:5432/UFC_DATABASE
+      DATABASE_URL: ${DATABASE_URL}  # URL de connexion à la base de données
+      # Ajoutez d'autres variables d'environnement ici si nécessaire
     ports:
-      - "8000:8000"
+      - "8000:8000"                          # Exposition du port 8000 pour l'API
     depends_on:
-      - db
+      - db                                   # Dépendance du service db
     networks:
-      - app-network
+      - app-network                          # Réseau partagé
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "curl", "-f", "http://api:8000/health"]  # Vérification de la santé de l'API
+      interval: 10s                          # Intervalle entre les vérifications
+      timeout: 5s                            # Délai d'attente pour chaque vérification
+      retries: 5                             # Nombre de tentatives avant d'échouer
 
   web:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ./frontend                    # Contexte de construction pour le service web
+      dockerfile: Dockerfile                 # Fichier Docker à utiliser pour construire l'image
     ports:
-      - "5000:5000"
+      - "5000:5000"                          # Exposition du port 5000 pour le frontend
     depends_on:
       api:
-        condition: service_healthy
+        condition: service_healthy           # Attendre que le service API soit sain
+      elasticsearch:
+        condition: service_healthy           # Attendre que le service Elasticsearch soit sain
     networks:
-      - app-network
+      - app-network                          # Réseau partagé
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    environment:
+      - discovery.type=single-node           # Configuration pour un nœud unique
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"     # Allocation mémoire Java pour Elasticsearch
+      - "network.host=0.0.0.0"               # Écoute sur toutes les interfaces réseau
+      - "ingest.geoip.downloader.enabled=false"  # Désactiver le téléchargement GeoIP
+    ports:
+      - "9200:9200"                          # Exposition du port 9200 pour Elasticsearch
+      - "9300:9300"                          # Exposition du port 9300 pour les communications internes
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data  # Persistance des données Elasticsearch
+    networks:
+      - app-network                          # Réseau partagé
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]  # Vérification de la disponibilité d'Elasticsearch
+      interval: 30s                         # Intervalle entre les vérifications
+      timeout: 10s                          # Délai d'attente pour chaque vérification
+      retries: 3                            # Nombre de tentatives avant d'échouer
 
 networks:
-  app-network:
-    driver: bridge
+  app-network:                               # Définition du réseau partagé
+    driver: bridge                           # Type de réseau
 
 volumes:
-  postgres_data:
+  postgres_data:                             # Volume persistant pour PostgreSQL
+  elasticsearch_data:                        # Volume persistant pour Elasticsearch
+

@@ -2,7 +2,6 @@ fastapi
 uvicorn
 sqlalchemy
 pydantic
-python-dotenv
 requests
 PyJWT
 passlib
@@ -11,3 +10,5 @@ pandas
 matplotlib
 seaborn
 asyncpg
+python-dotenv==1.0.0
+Werkzeug

@@ -20,6 +20,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le reste de l'application dans l'image
 COPY . .
 
+# Copier le fichier .env dans l'image (ajoutez cette ligne)
+COPY .env ./
+
 # Copier le script shell (script.sh) dans l'image
 COPY script.sh /app/script.sh
 

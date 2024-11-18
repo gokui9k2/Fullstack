@@ -3,61 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Dashboard UFC</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@3"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@3"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Dashboard UFC</h1>
-    </header>
-    
-    <main class="dashboard-container">
-        <!-- Box 1: Heatmap - Female -->
-        <div class="chart-box">
-            <h2>Heatmap - Femmes</h2>
-            <canvas id="heatmapFemaleChart" width="400" height="400"></canvas>
+    <!-- Navbar -->
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">Dashboard UFC</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="{{ url_for('logout') }}">Déconnexion</a>
         </div>
-        <div class="chart-box">
-            <h2>Heatmap - Hommes</h2>
-            <canvas id="heatmapMaleChart" width="400" height="400"></canvas>
-        </div>
-        <div class="chart-box">
-            <h2>Moyenne des coups significatifs touchés par âge et genre</h2>
-            <canvas id="lineChart" width="400" height="400"></canvas>
-        </div>
-        <div class="chart-box">
-            <h2>Pourcentage de victoire côté bleu vs côté rouge</h2>
-            <canvas id="myDoughnutChart" width="400" height="400"></canvas>
-        </div>
-        <div class="chart-box">
-            <h2>Pourcentage des différents types de finition</h2>
-            <canvas id="myPolarChart" width="400" height="400"></canvas>
-        </div>
-        <div class="chart-box map-box">
-            <h2>Les lieux les plus prisés par l'UFC</h2>
-            <canvas id="geoMapChart" width="800" height="600"></canvas>
-        </div>
-        <div class="chart-box">
-            <h2>Augmentation des événements UFC au cours des années</h2>
-            <canvas id="lineChartYear" width="800" height="600"></canvas>
-        </div>
-        <div class="data-box">
-            <h2>Disparité de genre</h2>
-            {% set gender_data = gender_disparity|tojson|safe %}
-            <script>
-                const genderData = JSON.parse({{ gender_data }});
-                document.write(`
-                    <p><strong>Nombre d'hommes :</strong> ${genderData.MALE}</p>
-                    <p><strong>Nombre de femmes :</strong> ${genderData.FEMALE}</p>
-                    <p><strong>Ratio :</strong> ${(genderData.MALE / genderData.FEMALE).toFixed(1)} hommes pour une femme</p>
-                `);
-            </script>
-        </div>
-    </main>
+    </div>
+</nav>
+    <div class="container-fluid px-4">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card stats-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Disparité de genre</h5>
+                        <div class="stats-content">
+                            {% set gender_data = gender_disparity|tojson|safe %}
+                            <script>
+                                const genderData = JSON.parse({{ gender_data }});
+                                document.write(`
+                                    <p class="mb-2"><strong>Hommes :</strong> ${genderData.MALE}</p>
+                                    <p class="mb-2"><strong>Femmes :</strong> ${genderData.FEMALE}</p>
+                                    <p class="mb-0"><strong>Ratio :</strong> ${(genderData.MALE / genderData.FEMALE).toFixed(1)}:1</p>
+                                `);
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Passing Data from Flask to JavaScript -->
+            <!-- Female Heatmap -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">Heatmap - Femmes</div>
+                    <div class="card-body">
+                        <canvas id="heatmapFemaleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Male Heatmap -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">Heatmap - Hommes</div>
+                    <div class="card-body">
+                        <canvas id="heatmapMaleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">Moyenne des coups significatifs par âge et genre</div>
+                    <div class="card-body">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">Victoires côté bleu vs rouge</div>
+                    <div class="card-body">
+                        <canvas id="myDoughnutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">Types de finition</div>
+                    <div class="card-body">
+                        <canvas id="myPolarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Box -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">Rechercher un combattant</div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <input type="text" id="fighter_name" class="form-control" placeholder="Nom du combattant">
+                            <button class="btn btn-dark" type="button" id="searchButton">Rechercher</button>
+                        </div>
+                        <div id="searchResults"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UFC Events Map -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">Lieux des événements UFC</div>
+                    <div class="card-body map-container">
+                        <canvas id="geoMapChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UFC Events Over Time -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">Évolution des événements UFC</div>
+                    <div class="card-body">
+                        <canvas id="lineChartYear"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Data Scripts -->
     <script>
         const heatmapFemaleData = {{ heatmap_female | safe }};
         const heatmapMaleData = {{ heatmap_male | safe }}; 
@@ -66,15 +137,18 @@
         const ratio = {{ winner_rat | safe }};
         const finish = {{ finish_ratio | safe }};
         const coordinatesData = {{ coordinates | safe }};
+        const ufc_popularity = {{ ufc_love | safe }};
     </script>
 
-    <!-- Link to the external JavaScript files -->
+    <!-- Chart Scripts -->
     <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/search.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_1.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_2.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_3.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_4.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_5.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_6.js') }}"></script>
+
 </body>
 </html>

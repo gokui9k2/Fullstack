@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e  # Arrêt en cas d'erreur
+set -e 
 
 echo "Attente de la base de données..."
 python << 'END'
@@ -8,17 +8,23 @@ import asyncpg
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
+
+db_user = os.getenv("POSTGRES_USER")
+db_password = os.getenv("POSTGRES_PASSWORD")
+db_name = os.getenv("POSTGRES_DB")
+
 async def wait_for_db():
     retries = 0
-    while retries < 30:  # Maximum 30 tentatives
+    while retries < 30:  
         try:
-            conn = await asyncpg.connect('postgresql://Faker:nigGaTHEcops987@db:5432/UFC_DATABASE')
+            conn = await asyncpg.connect(f'postgresql://{db_user}:{db_password}@db:5432/{db_name}')
             await conn.close()
             print("✓ Connexion à la base de données établie avec succès")
             return True
         except Exception as e:
             retries += 1
-            print(f"Tentative {retries}/30: Base de données pas encore prête...")
+            print(f"Tentative {retries}/30: Base de données pas encore prête... Erreur : {e}")
             await asyncio.sleep(1)
     return False
 
@@ -42,5 +48,4 @@ done
 
 echo "✓ L'API est prête !"
 
-# Garder le conteneur en cours d'exécution
 tail -f /dev/null

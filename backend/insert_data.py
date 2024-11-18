@@ -4,8 +4,15 @@ import asyncpg
 import numpy as np
 from datetime import datetime
 from typing import List, Dict, Any
+from dotenv import load_dotenv
+import os
 
-# Configuration des types de données
+load_dotenv()
+
+db_user = os.getenv("POSTGRES_USER")
+db_password = os.getenv("POSTGRES_PASSWORD")
+db_name = os.getenv("POSTGRES_DB")
+
 DTYPE_MAPPING = {
     'b_age': ('DOUBLE PRECISION', np.float64),
     'b_avg_sig_str_landed': ('DOUBLE PRECISION', np.float64),
@@ -20,7 +27,15 @@ DTYPE_MAPPING = {
     'finish': ('VARCHAR(50)', str),
     'latitude': ('DOUBLE PRECISION', np.float64),
     'longitude': ('DOUBLE PRECISION', np.float64),
-    'location' : ('VARCHAR(50)', str)
+    'location' : ('VARCHAR(50)', str),
+    'r_weight_lbs' : ('DOUBLE PRECISION',np.float64),
+    'r_height_cms' : ('DOUBLE PRECISION',np.float64),
+    'r_stance' :  ('VARCHAR(50)', str),
+    'b_weight_lbs' : ('DOUBLE PRECISION',np.float64),
+    'b_height_cms' : ('DOUBLE PRECISION',np.float64),
+    'b_stance' :  ('VARCHAR(50)', str),
+    'r_fighter' : ('VARCHAR(50)' , str),
+    'b_fighter' : ('VARCHAR(50)', str)
 }
 
 async def verify_table_structure(conn) -> List[Dict[str, Any]]:
@@ -39,24 +54,34 @@ async def verify_table_structure(conn) -> List[Dict[str, Any]]:
         print("---")
     return columns
 
+async def table_exists(conn, table_name):
+    """Vérifie si une table existe dans la base de données."""
+    query = '''
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.tables
+            WHERE table_name = $1
+        )
+    '''
+    result = await conn.fetchval(query, table_name)
+    return result
+
 async def drop_all_tables(conn):
-    """Supprime toutes les tables existantes."""
     try:
         tables = await conn.fetch(
             "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"
         )
         for table in tables:
             table_name = table['table_name']
-            await conn.execute(f"DROP TABLE IF EXISTS {table_name} CASCADE;")
+            # Ajout des guillemets doubles pour échapper les noms de table
+            await conn.execute(f'DROP TABLE IF EXISTS "{table_name}" CASCADE;')
             print(f"Table '{table_name}' supprimée avec succès.")
     except Exception as e:
         print(f"Erreur lors de la suppression des tables : {e}")
         raise
 
 async def create_table(conn):
-    """Crée la table ufctable avec la structure appropriée."""
     try:
-        # Construction de la requête de création de table
         columns_def = [f"id SERIAL PRIMARY KEY"]
         columns_def.extend([
             f"{col_name} {sql_type}"
@@ -72,7 +97,6 @@ async def create_table(conn):
         await conn.execute(create_query)
         print("Table 'ufctable' créée avec succès.")
         
-        # Vérification de la création
         columns = await verify_table_structure(conn)
         expected_columns = set(DTYPE_MAPPING.keys()) | {'id'}
         actual_columns = {col['column_name'] for col in columns}
@@ -85,13 +109,30 @@ async def create_table(conn):
         print(f"Erreur lors de la création de la table : {e}")
         raise
 
-async def process_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    """Traite le DataFrame pour assurer la conformité des types de données."""
+async def create_table_user(conn):
+    """Créer une table User si elle n'existe pas déjà."""
     try:
-        # Conversion des noms de colonnes en minuscules
+        if not await table_exists(conn, 'users'):  # Changé de 'user' à 'users'
+            await conn.execute('''
+                CREATE TABLE "users" (  
+                    id SERIAL PRIMARY KEY,
+                    email VARCHAR(255) NOT NULL UNIQUE,
+                    password VARCHAR(255) NOT NULL
+                )
+            ''')
+            print("Table 'users' créée avec succès.")
+        else:
+            print("La table 'users' existe déjà.")
+    except Exception as e:
+        print(f"Erreur lors de la création de la table 'users' : {e}")
+        raise
+
+# Le reste du code reste inchangé...
+
+async def process_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    try:
         df.columns = [col.lower() for col in df.columns]
         
-        # Application des types de données
         for column, (_, dtype) in DTYPE_MAPPING.items():
             if column not in df.columns:
                 raise ValueError(f"Colonne manquante dans le CSV : {column}")
@@ -101,16 +142,13 @@ async def process_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             elif dtype == str:
                 df[column] = df[column].fillna('').astype(str)
             elif dtype == pd.Timestamp:
-                # Convertir la colonne en datetime, en gérant les erreurs avec 'coerce'
                 df[column] = pd.to_datetime(df[column], errors='coerce')
-                # Si une date est mal formatée, la remplacer par '1900-01-01'
                 df[column] = df[column].fillna(pd.Timestamp('1900-01-01'))
         
         return df
     except Exception as e:
         print(f"Erreur lors du traitement du DataFrame : {e}")
         raise
-
 
 async def insert_batch(conn, batch_values: List[List[Any]]):
     """Insère un lot de données dans la table."""
@@ -146,29 +184,20 @@ async def verify_data(conn):
         raise
 
 async def insert_data():
-    """Fonction principale pour l'insertion des données."""
     try:
-        # Lecture du CSV
-        print("Lecture du fichier CSV...")
-        df = pd.read_csv("data_ufc.csv", encoding='utf-8')
+        df = pd.read_csv("data_ufc_formatted.csv", encoding='utf-8')
         df = await process_dataframe(df)
         
-        # Connexion à la base de données
-        print("\nConnexion à la base de données...")
-        db_url = 'postgresql://Faker:nigGaTHEcops987@db:5432/UFC_DATABASE'
+        db_url = f'postgresql://{db_user}:{db_password}@db:5432/{db_name}'
         pool = await asyncpg.create_pool(db_url)
         
         async with pool.acquire() as conn:
-            # Suppression des tables existantes
-            print("\nSuppression des tables existantes...")
             await drop_all_tables(conn)
             
-            # Création de la nouvelle table
-            print("\nCréation de la nouvelle table...")
             await create_table(conn)
             
-            # Préparation et insertion des données
-            print("\nInsertion des données...")
+            await create_table_user(conn)
+            
             values = df[list(DTYPE_MAPPING.keys())].values.tolist()
             
             batch_size = 1000
@@ -176,12 +205,9 @@ async def insert_data():
                 batch = values[i:i + batch_size]
                 await insert_batch(conn, batch)
             
-            # Vérification finale
-            print("\nVérification finale des données...")
             await verify_data(conn)
         
         await pool.close()
-        print("\nTraitement terminé avec succès!")
         
     except Exception as e:
         print(f"\nErreur critique lors du traitement : {e}")

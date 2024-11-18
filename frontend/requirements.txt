@@ -6,3 +6,8 @@ requests
 uvicorn
 gunicorn
 asgiref
+python-dotenv==1.0.0
+elasticsearch
+Flask-SQLAlchemy
+Werkzeug
+psycopg2-binary

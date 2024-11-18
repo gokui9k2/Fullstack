@@ -1,64 +1,44 @@
-/* Basic reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    background-color: #f8f9fa;
 }
 
-header {
-    background-color: #4CAF50;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
+.navbar {
+    background: linear-gradient(135deg, #dc3545 0%, #212529 100%);
 }
 
-h1 {
-    font-size: 2em;
+.card {
+    transition: transform 0.2s;
+    margin-bottom: 1rem;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
-.dashboard-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
-.chart-box, .data-box {
+.card-header {
     background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    border-bottom: 2px solid #f8f9fa;
+    font-weight: 600;
 }
 
-.chart-box h2, .data-box h2 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
+.search-box {
+    background: white;
+    border-radius: 0.5rem;
 }
 
-.chart-box canvas, .data-box p {
-    width: 100% !important;
-    height: auto !important;
+.map-container {
+    height: 600px;
 }
 
-.map-box {
-    grid-column: span 2; /* This box will take up two columns for the map */
+.stats-card {
+    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+    color: white;
 }
 
-.data-box {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-p {
-    font-size: 1.1em;
-    margin: 5px 0;
+canvas {
+    max-width: 100%;
 }

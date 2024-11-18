@@ -1,8 +1,14 @@
 
 import pandas as pd 
 from request import get_token, api_request
+from elastic_ingestion import main
+import time 
+from elasticsearch import Elasticsearch
+import time
+from dotenv import load_dotenv
+import os 
 
-
+load_dotenv()
 
 def data_SIG_STR(df): 
     df_blue = df[["b_age", "b_avg_sig_str_landed", "gender"]].rename(columns={"r_age": "Age", "b_avg_sig_str_landed": "avg_SIG_STR_landed"})
@@ -33,8 +39,6 @@ def finish_ratio(df) :
     percentage = (value_counts / len(df)) * 100
     return percentage 
 
-import pandas as pd
-
 def date(df):
     df['date'] = pd.to_datetime(df['date'], errors='coerce', dayfirst=False)
     df['date'] = df['date'].fillna(pd.to_datetime(df['date'], format='%m/%d/%Y', errors='coerce'))
@@ -59,16 +63,39 @@ def carte(df):
 
 
 def gender_tot(df):
-    gender_counts = df["gender"].value_counts()
+    df_blue = df[['r_fighter', "gender"]].rename(columns={'r_fighter': 'fighter'})
+    df_red = df[['b_fighter', "gender"]].rename(columns={'b_fighter': 'fighter'})
+    df_combined = pd.concat([df_blue, df_red], ignore_index=True)
+
+    df_unique_fighters = df_combined.drop_duplicates(subset=['fighter'])
+    gender_counts = df_unique_fighters["gender"].value_counts()
     gender_dict = gender_counts.to_dict()
     return gender_dict
 
 
 
-def process() : 
+
+
+def wait_for_elasticsearch(host="elasticsearch", port=9200, timeout=60, scheme="http"):
+    """Attendre qu'Elasticsearch soit disponible"""
+    es = Elasticsearch([{'host': host, 'port': port, 'scheme': scheme}])
+    start_time = time.time()
+    while True:
+        if es.ping():
+            print("Elasticsearch est prêt!")
+            return True
+        if time.time() - start_time > timeout:
+            raise ConnectionError("Elasticsearch n'est pas prêt après 60 secondes")
+        print("En attente d'Elasticsearch...")
+        time.sleep(5)
+
+
+
+def process(user):
+
     login_url = "http://api:8000/login"
     data_url = "http://api:8000/data"
-    token = get_token("user", "password", login_url)
+    token = get_token(user.email, user.password, login_url)
     data = api_request(data_url, token)
     df = pd.DataFrame(data['data'])
     df_str = data_SIG_STR(df)
@@ -79,5 +106,7 @@ def process() :
     influnce_carte = carte(df)
     gender_disparity = gender_tot(df)
 
+    wait_for_elasticsearch()
+    main(df)
     return df_str , df_male ,df_female , red_blue ,finish_rat , ufc_love , influnce_carte, gender_disparity
 
