@@ -86,9 +86,14 @@ def register():
         try:
             email = request.form.get('email')
             password = request.form.get('password')
+            confirm_password = request.form.get('confirm_password')
 
-            if not email or not password:
-                return jsonify({'error': 'Email and password are required'}), 400
+            if not email or not password or not confirm_password:
+                return jsonify({'error': 'Email, password, and confirmation are required'}), 400
+
+            if password != confirm_password:
+                return jsonify({'error': 'Passwords do not match'}), 400
+
             existing_user = User.query.filter_by(email=email).first()
             if existing_user:
                 return jsonify({'error': 'Email already exists'}), 400
@@ -99,13 +104,14 @@ def register():
             db.session.add(new_user)
             db.session.commit()
 
-            return jsonify({'message': 'User registered successfully'}), 201
+            return redirect(url_for('login'))
 
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
 
     return render_template('register.html')
+
 
 def login_required(f):
     @wraps(f)
@@ -219,6 +225,7 @@ def index():
     line_plot_male_json = json.dumps(line_plot_male)
     heatmap_female_html_json = json.dumps(heatmap_female_html)
     heatmap_male_html_json = json.dumps(heatmap_male_html)
+    print(gender_data)  # Pour voir ce que contient gender_disparity
 
     return render_template(
         'index.html',
@@ -234,5 +241,6 @@ def index():
     )
 
 
-if __name__ == '__main__':
-    app.run(debug=True) 
+if __name__ == "__main__":
+    app.run(debug=True)
+

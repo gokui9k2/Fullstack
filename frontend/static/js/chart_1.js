@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return 'rgba(255, 99, 132, 1)'; // Couleur différente pour la barre la plus grande
             } else {
                 const intensity = Math.min(1, value / 100);
-                return `rgba(0, 128, 0, ${intensity})`; // Couleur pour les autres barres
+                return `rgba(0, 100, 0, ${intensity})`; // Couleur légèrement plus foncée pour les autres barres
             }
         });
 
@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     label: 'Significant Strike Percentage',
                     data: maleStrikePercentages,
                     backgroundColor: backgroundColors,
-                    borderColor: 'rgba(0, 128, 0, 0.8)',
-                    borderWidth: 1
+                    borderColor: 'rgba(0, 100, 0, 0)', // Pas de contour
+                    borderWidth: 0 // Retirer le contour
                 }]
             },
             options: {

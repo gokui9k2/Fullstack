@@ -4,143 +4,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard UFC</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@3"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navbar -->
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#">Dashboard UFC</a>
-        <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="{{ url_for('logout') }}">Déconnexion</a>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">Dashboard UFC</a>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Menu
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">Déconnexion</a></li>
+                        <li><a class="dropdown-item" href="#" id="showInfo">Information utilité</a></li>
+                        <li><a class="dropdown-item" href="#" id="showStats">Statistique</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </div>
-</nav>
-    <div class="container-fluid px-4">
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="card stats-card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Disparité de genre</h5>
-                        <div class="stats-content">
-                            {% set gender_data = gender_disparity|tojson|safe %}
-                            <script>
-                                const genderData = JSON.parse({{ gender_data }});
-                                document.write(`
-                                    <p class="mb-2"><strong>Hommes :</strong> ${genderData.MALE}</p>
-                                    <p class="mb-2"><strong>Femmes :</strong> ${genderData.FEMALE}</p>
-                                    <p class="mb-0"><strong>Ratio :</strong> ${(genderData.MALE / genderData.FEMALE).toFixed(1)}:1</p>
-                                `);
-                            </script>
+    </nav>
+
+        <div class="container-fluid px-4">
+            <div id="infoSection">
+                <!-- First row for the gender stats cards -->
+                <div class="row justify-content-center"> 
+                    <div class="col-md-3"> 
+                        <div class="card stats-card h-99">
+                            <div class="card-body text-center">
+                                {% set gender_data = gender_disparity|tojson|safe %}
+                                <script>
+                                    const genderData = JSON.parse({{ gender_data }});
+                                    document.write(`
+                                        <p class="mb-2"><strong>Nombres d'Hommes à l'UFC :</strong><br><span class="large-number">${genderData.MALE}</span></p>
+                                    `);
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3"> 
+                        <div class="card stats-card h-99">
+                            <div class="card-body text-center">
+                                <script>
+                                    document.write(`
+                                        <p class="mb-0"><strong>Ratio Homme/Femme au sein de l'UFC :</strong><br><span class="large-number">${(genderData.MALE / genderData.FEMALE).toFixed(1)}</span></p>
+                                    `);
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3"> 
+                        <div class="card stats-card h-99">
+                            <div class="card-body text-center">
+                                <script>
+                                    document.write(`
+                                        <p class="mb-2"><strong>Nombres de Femmes à l'UFC :</strong><br><span class="large-number">${genderData.FEMALE}</span></p>
+                                    `);
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">Rechercher un combattant</div>
+                            <div class="card-body">
+                                <div class="input-group mb-3">
+                                    <input type="text" id="fighter_name" class="form-control" placeholder="Nom du combattant">
+                                    <button class="btn btn-dark" type="button" id="searchButton">Rechercher</button>
+                                </div>
+                                <div id="searchResults"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Evolution of UFC Events -->
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">Évolution des événements UFC</div>
+                            <div class="card-body">
+                                <canvas id="lineChartYear"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </div>
+    
+        <div id="statsSection" class="hidden">
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 equal-height-card">
+                        <div class="card-header">Heatmap - Femmes</div>
+                        <div class="card-body">
+                            <canvas id="heatmapFemaleChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 equal-height-card">
+                        <div class="card-header">Heatmap - Hommes</div>
+                        <div class="card-body">
+                            <canvas id="heatmapMaleChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 equal-height-card">
+                        <div class="card-header">Moyenne des coups significatifs par âge et genre</div>
+                        <div class="card-body">
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Dernières cartes avec une classe personnalisée -->
+                <div class="col-md-4 col-lg-4">
+                    <div class="card h-100 equal-height-card">
+                        <div class="card-header">Victoires côté bleu vs rouge</div>
+                        <div class="card-body">
+                            <canvas id="myDoughnutChart" width="200" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="col-md-4 col-lg-4">
+                    <div class="card h-100 equal-height-card">
+                        <div class="card-header">Types de finition</div>
+                        <div class="card-body">
+                            <canvas id="myPolarChart" width="200" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="col-md-4 col-lg-4">
+                    <div class="card h-100 equal-height-card">
+                        <div class="card-header">Lieux des événements UFC</div>
+                        <div class="card-body map-container">
+                            <canvas id="geoMapChart" width="200" height="200"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Female Heatmap -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">Heatmap - Femmes</div>
-                    <div class="card-body">
-                        <canvas id="heatmapFemaleChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Male Heatmap -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">Heatmap - Hommes</div>
-                    <div class="card-body">
-                        <canvas id="heatmapMaleChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">Moyenne des coups significatifs par âge et genre</div>
-                    <div class="card-body">
-                        <canvas id="lineChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">Victoires côté bleu vs rouge</div>
-                    <div class="card-body">
-                        <canvas id="myDoughnutChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">Types de finition</div>
-                    <div class="card-body">
-                        <canvas id="myPolarChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search Box -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">Rechercher un combattant</div>
-                    <div class="card-body">
-                        <div class="input-group mb-3">
-                            <input type="text" id="fighter_name" class="form-control" placeholder="Nom du combattant">
-                            <button class="btn btn-dark" type="button" id="searchButton">Rechercher</button>
-                        </div>
-                        <div id="searchResults"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- UFC Events Map -->
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">Lieux des événements UFC</div>
-                    <div class="card-body map-container">
-                        <canvas id="geoMapChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- UFC Events Over Time -->
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">Évolution des événements UFC</div>
-                    <div class="card-body">
-                        <canvas id="lineChartYear"></canvas>
-                    </div>
-                </div>
-            </div>
         </div>
+        
+        
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Data Scripts -->
     <script>
         const heatmapFemaleData = {{ heatmap_female | safe }};
-        const heatmapMaleData = {{ heatmap_male | safe }}; 
+        const heatmapMaleData = {{ heatmap_male | safe }};
         const lineplotMaleData = {{ line_plot_male | safe }};
-        const lineplotFemaleData = {{ line_plot_female | safe }}; 
+        const lineplotFemaleData = {{ line_plot_female | safe }};
         const ratio = {{ winner_rat | safe }};
         const finish = {{ finish_ratio | safe }};
         const coordinatesData = {{ coordinates | safe }};
         const ufc_popularity = {{ ufc_love | safe }};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const infoSection = document.getElementById('infoSection');
+            const statsSection = document.getElementById('statsSection');
+            const showInfo = document.getElementById('showInfo');
+            const showStats = document.getElementById('showStats');
+
+            infoSection.classList.remove('hidden');
+            statsSection.classList.add('hidden');
+
+            showInfo.addEventListener('click', function(e) {
+                e.preventDefault();
+                infoSection.classList.remove('hidden');
+                statsSection.classList.add('hidden');
+            });
+
+            showStats.addEventListener('click', function(e) {
+                e.preventDefault();
+                infoSection.classList.add('hidden');
+                statsSection.classList.remove('hidden');
+            });
+        });
     </script>
 
-    <!-- Chart Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
     <script src="{{ url_for('static', filename='js/search.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_1.js') }}"></script>
@@ -149,6 +208,5 @@
     <script src="{{ url_for('static', filename='js/chart_4.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_5.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chart_6.js') }}"></script>
-
 </body>
 </html>

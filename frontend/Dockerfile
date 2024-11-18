@@ -26,4 +26,5 @@ COPY .env ./
 EXPOSE 5000
 
 # Exécuter l'application avec gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--reload", "--bind", "0.0.0.0:5000", "app:app"]
+
