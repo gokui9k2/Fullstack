@@ -85,6 +85,10 @@ Pour effectuer ces tests, il faut entrer dans le conteneur api comme ceci :
 docker exec -it full_stack-api-1 /bin/sh
 ```
 
+```bash
+pytest test.py
+```
+
 ## Conclusion
 
 Ce projet met en œuvre une architecture fullstack moderne, avec une attention particulière à la sécurité, à la performance et à l’expérience utilisateur. Grâce à la conteneurisation et à l’orchestration, l’application est prête pour une utilisation professionnelle ou académique. Nous espérons qu’elle reflète notre maîtrise des concepts étudiés tout en offrant une base solide pour des améliorations futures.
