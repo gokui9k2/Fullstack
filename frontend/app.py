@@ -29,10 +29,8 @@ db = SQLAlchemy(app)
 
 es = Elasticsearch(hosts=['http://elasticsearch:9200'])
 
-
-
 class User(db.Model):
-    __tablename__ = 'users'  # Nom de la table existante
+    __tablename__ = 'users' 
     
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
@@ -225,7 +223,6 @@ def index():
     line_plot_male_json = json.dumps(line_plot_male)
     heatmap_female_html_json = json.dumps(heatmap_female_html)
     heatmap_male_html_json = json.dumps(heatmap_male_html)
-    print(gender_data)  # Pour voir ce que contient gender_disparity
 
     return render_template(
         'index.html',

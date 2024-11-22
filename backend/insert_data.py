@@ -39,7 +39,6 @@ DTYPE_MAPPING = {
 }
 
 async def verify_table_structure(conn) -> List[Dict[str, Any]]:
-    """Vérifie la structure de la table et retourne les détails des colonnes."""
     columns = await conn.fetch("""
         SELECT column_name, data_type, character_maximum_length
         FROM information_schema.columns
@@ -55,7 +54,6 @@ async def verify_table_structure(conn) -> List[Dict[str, Any]]:
     return columns
 
 async def table_exists(conn, table_name):
-    """Vérifie si une table existe dans la base de données."""
     query = '''
         SELECT EXISTS (
             SELECT 1
@@ -73,7 +71,6 @@ async def drop_all_tables(conn):
         )
         for table in tables:
             table_name = table['table_name']
-            # Ajout des guillemets doubles pour échapper les noms de table
             await conn.execute(f'DROP TABLE IF EXISTS "{table_name}" CASCADE;')
             print(f"Table '{table_name}' supprimée avec succès.")
     except Exception as e:
@@ -95,7 +92,6 @@ async def create_table(conn):
         """
         
         await conn.execute(create_query)
-        print("Table 'ufctable' créée avec succès.")
         
         columns = await verify_table_structure(conn)
         expected_columns = set(DTYPE_MAPPING.keys()) | {'id'}
@@ -110,9 +106,9 @@ async def create_table(conn):
         raise
 
 async def create_table_user(conn):
-    """Créer une table User si elle n'existe pas déjà."""
+
     try:
-        if not await table_exists(conn, 'users'):  # Changé de 'user' à 'users'
+        if not await table_exists(conn, 'users'): 
             await conn.execute('''
                 CREATE TABLE "users" (  
                     id SERIAL PRIMARY KEY,
@@ -126,8 +122,6 @@ async def create_table_user(conn):
     except Exception as e:
         print(f"Erreur lors de la création de la table 'users' : {e}")
         raise
-
-# Le reste du code reste inchangé...
 
 async def process_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     try:
@@ -151,7 +145,6 @@ async def process_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         raise
 
 async def insert_batch(conn, batch_values: List[List[Any]]):
-    """Insère un lot de données dans la table."""
     try:
         columns = list(DTYPE_MAPPING.keys())
         placeholders = ','.join(f'${i+1}' for i in range(len(columns)))
@@ -169,7 +162,6 @@ async def insert_batch(conn, batch_values: List[List[Any]]):
         raise
 
 async def verify_data(conn):
-    """Vérifie les données insérées."""
     try:
         count = await conn.fetchval("SELECT COUNT(*) FROM ufctable;")
         print(f"\nNombre total de lignes dans la table: {count}")

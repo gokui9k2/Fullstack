@@ -13,12 +13,11 @@ import jwt
 from datetime import datetime, timedelta
 import math
 from werkzeug.security import check_password_hash
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 
 load_dotenv()
 
-
-
-# Variables sensibles
 DATABASE_URL = os.getenv("DATABASE_URL")
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 JWT_SECRET_ALGORITHM = os.getenv("JWT_SECRET_ALGORITHM")
@@ -82,7 +81,7 @@ class FighterData(BaseModel):
 class DataResponse(BaseModel):
     data: List[FighterData]
 
-# Fonctions d'authentification restent les mêmes
+
 def create_jwt_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=30)
@@ -90,24 +89,23 @@ def create_jwt_token(data: dict):
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_SECRET_ALGORITHM)
     return encoded_jwt
 
-
 def verify_credentials(username: str, password: str, db: Session):
-    """Vérifie les credentials avec le hash stocké"""
     user = db.query(User).filter(User.email == username).first()
     if not user:
         return False
-    
-    # Le mot de passe dans la DB est déjà hashé, on doit le comparer directement
     return user.password == password 
 
-
 def verify_authorization_header(access_token: str):
-    if not access_token or not access_token.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="No auth provided.")
     try:
-        token = access_token.split("Bearer ")[1]
+        if not access_token or not access_token.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="No auth provided.")
+        
+        token = access_token.split("Bearer ")[1].strip()
+        
         auth = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_SECRET_ALGORITHM])
         return auth
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired.")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token.")
 
@@ -130,7 +128,6 @@ def read_data(request: Request, db: Session = Depends(get_db)):
     auth_header = request.headers.get("Authorization")
     auth_data = verify_authorization_header(auth_header)
     
-    # Vérifier que l'utilisateur existe toujours dans la base de données
     user = db.query(User).filter(User.email == auth_data["sub"]).first()
     if not user:
         raise HTTPException(status_code=401, detail="User no longer exists.")
@@ -180,7 +177,7 @@ def read_data(request: Request, db: Session = Depends(get_db)):
             r_avg_sig_str_pct=sanitize_float(row.r_avg_sig_str_pct),
             gender=str(row.gender) if row.gender else None,
             winner=str(row.winner) if row.winner else None,
-            date=row.date.strftime("%Y-%m-%d") if row.date else None,  # Formatage de la date ici
+            date=row.date.strftime("%Y-%m-%d") if row.date else None,
             finish=str(row.finish) if row.finish else None,
             latitude=sanitize_float(row.latitude),
             longitude=sanitize_float(row.longitude),
@@ -197,6 +194,27 @@ def read_data(request: Request, db: Session = Depends(get_db)):
         formatted_results.append(fighter_data)
 
     return DataResponse(data=formatted_results)
+
+@app.exception_handler(403)
+async def forbidden_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=403,
+        content={
+            "error": "Forbidden",
+            "message": "You do not have permission to access this resource."
+        }
+    )
+
+@app.exception_handler(404)
+async def not_found_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "Not Found",
+            "message": "The requested resource could not be found."
+        }
+    )
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

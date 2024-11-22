@@ -19,7 +19,6 @@ def data_SIG_STR(df):
     
     return df
 
-
 def data_weight_class(df): 
     df_blue = df[['b_avg_sig_str_pct', "weight_class", "gender"]].rename(columns={'b_avg_sig_str_pct': 'avg_SIG_STR_pct'})
     df_red = df[['r_avg_sig_str_pct', "weight_class", "gender"]].rename(columns={'r_avg_sig_str_pct': 'avg_SIG_STR_pct'})
@@ -47,7 +46,6 @@ def date(df):
     
     return events_per_year_dict
 
-
 def carte(df):
     location_counts = df.groupby(['latitude', 'longitude', 'location']).size()
     location_dict = [
@@ -61,7 +59,6 @@ def carte(df):
     ]
     return location_dict
 
-
 def gender_tot(df):
     df_blue = df[['r_fighter', "gender"]].rename(columns={'r_fighter': 'fighter'})
     df_red = df[['b_fighter', "gender"]].rename(columns={'b_fighter': 'fighter'})
@@ -71,10 +68,6 @@ def gender_tot(df):
     gender_counts = df_unique_fighters["gender"].value_counts()
     gender_dict = gender_counts.to_dict()
     return gender_dict
-
-
-
-
 
 def wait_for_elasticsearch(host="elasticsearch", port=9200, timeout=60, scheme="http"):
     """Attendre qu'Elasticsearch soit disponible"""
@@ -88,8 +81,6 @@ def wait_for_elasticsearch(host="elasticsearch", port=9200, timeout=60, scheme="
             raise ConnectionError("Elasticsearch n'est pas prêt après 60 secondes")
         print("En attente d'Elasticsearch...")
         time.sleep(5)
-
-
 
 def process(user):
 

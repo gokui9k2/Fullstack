@@ -1,51 +1,51 @@
-version: '3.8'  # Version de la syntaxe du fichier
+version: '3.8' 
 
 services:
   db: 
     image: postgres:latest
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}      # Utilisateur de la base de données
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Mot de passe de la base de données
-      POSTGRES_DB: ${POSTGRES_DB}            # Nom de la base de données
+      POSTGRES_USER: ${POSTGRES_USER}    
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}   
     ports:
-      - "5432:5432"                          # Exposition du port 5432
+      - "5432:5432"                       
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persistance des données
+      - postgres_data:/var/lib/postgresql/data 
     networks:
-      - app-network                          # Réseau partagé
+      - app-network                        
 
   api:
     build:
-      context: ./backend                     # Contexte de construction pour le service API
-      dockerfile: Dockerfile                 # Fichier Docker à utiliser pour construire l'image
+      context: ./backend               
+      dockerfile: Dockerfile              
     restart: always                        
     environment:
-      DATABASE_URL: ${DATABASE_URL}  # URL de connexion à la base de données
-      # Ajoutez d'autres variables d'environnement ici si nécessaire
+      DATABASE_URL: ${DATABASE_URL} 
+
     ports:
-      - "8000:8000"                          # Exposition du port 8000 pour l'API
+      - "8000:8000"                
     depends_on:
-      - db                                   # Dépendance du service db
+      - db                           
     networks:
-      - app-network                          # Réseau partagé
+      - app-network                         
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://api:8000/health"]  # Vérification de la santé de l'API
-      interval: 10s                          # Intervalle entre les vérifications
-      timeout: 5s                            # Délai d'attente pour chaque vérification
-      retries: 5                             # Nombre de tentatives avant d'échouer
+      test: ["CMD", "curl", "-f", "http://api:8000/health"] 
+      interval: 10s                       
+      timeout: 5s                         
+      retries: 5                         
 
   web:
     build:
-      context: ./frontend                    # Contexte de construction pour le service web
-      dockerfile: Dockerfile                 # Fichier Docker à utiliser pour construire l'image
+      context: ./frontend                
+      dockerfile: Dockerfile    
     ports:
-      - "5000:5000"                          # Exposition du port 5000 pour le frontend
+      - "5000:5000"                         
     depends_on:
       api:
-        condition: service_healthy           # Attendre que le service API soit sain
+        condition: service_healthy         
       elasticsearch:
-        condition: service_healthy           # Attendre que le service Elasticsearch soit sain
+        condition: service_healthy     
     networks:
       - app-network 
     volumes:
@@ -54,28 +54,28 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
     environment:
-      - discovery.type=single-node           # Configuration pour un nœud unique
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"     # Allocation mémoire Java pour Elasticsearch
-      - "network.host=0.0.0.0"               # Écoute sur toutes les interfaces réseau
-      - "ingest.geoip.downloader.enabled=false"  # Désactiver le téléchargement GeoIP
+      - discovery.type=single-node        
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"    
+      - "network.host=0.0.0.0"            
+      - "ingest.geoip.downloader.enabled=false"  
     ports:
-      - "9200:9200"                          # Exposition du port 9200 pour Elasticsearch
-      - "9300:9300"                          # Exposition du port 9300 pour les communications internes
+      - "9200:9200"          
+      - "9300:9300"                          
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data  # Persistance des données Elasticsearch
+      - elasticsearch_data:/usr/share/elasticsearch/data  
     networks:
-      - app-network                          # Réseau partagé
+      - app-network                     
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]  # Vérification de la disponibilité d'Elasticsearch
-      interval: 30s                         # Intervalle entre les vérifications
-      timeout: 10s                          # Délai d'attente pour chaque vérification
-      retries: 3                            # Nombre de tentatives avant d'échouer
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"] 
+      interval: 30s                  
+      timeout: 10s 
+      retries: 3                   
 
 networks:
-  app-network:                               # Définition du réseau partagé
-    driver: bridge                           # Type de réseau
+  app-network:                     
+    driver: bridge                       
 
 volumes:
-  postgres_data:                             # Volume persistant pour PostgreSQL
-  elasticsearch_data:                        # Volume persistant pour Elasticsearch
+  postgres_data:                        
+  elasticsearch_data:                   
 

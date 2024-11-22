@@ -5,10 +5,13 @@ pydantic
 requests
 PyJWT
 passlib
-psycopg2
-pandas 
+psycopg2-binary
+pandas
 matplotlib
 seaborn
 asyncpg
 python-dotenv==1.0.0
 Werkzeug
+pytest
+httpx
+pytest-asyncio
