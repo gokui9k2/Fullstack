@@ -8,6 +8,17 @@ L’objectif est de fournir un outil interactif permettant de visualiser, recher
 
 ---
 
+## Guide Utilisateur
+
+Pour lancer cette application, il faut exécuter les commandes suivantes dans le terminal :
+
+```bash
+docker-compose build
+docker-compose up
+```
+
+
+
 ### Voici une petite aperçu de notre application: 
 
 [Watch the video](https://youtu.be/4NgM59sO4DM)
@@ -67,6 +78,12 @@ Le fichier `docker-compose.yml` gère la coordination des services en définissa
 ### Test unitaire : 
 
 Pour finir ce projet, nous avons décidé d'effectuer des tests unitaires. Malheureusement, nous n'avons pas réussi à faire tous les tests que nous voulions. Il est généralement préférable de réaliser des tests unitaires pendant le développement, mais dans notre cas, nous les avons effectués après la création de l'application. Cependant, nous avons tout de même pu réaliser certains de ces tests, comme celui du login, entre autres.
+
+Pour effectuer ces tests, il faut entrer dans le conteneur api comme ceci :
+
+```bash
+docker exec -it full_stack-api-1 /bin/sh
+```
 
 ## Conclusion
 
