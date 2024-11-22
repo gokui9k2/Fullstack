@@ -8,9 +8,7 @@ L’objectif est de fournir un outil interactif permettant de visualiser, recher
 
 ---
 
-# Photo d'introduction (à supprimer): 
-
-![Alt Text](Image/Interface.png)
+![Alt Text](image.png)
 
 ## Sommaire 
 
