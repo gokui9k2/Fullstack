@@ -8,6 +8,10 @@ L’objectif est de fournir un outil interactif permettant de visualiser, recher
 
 ---
 
+### Here’s a preview of our application:
+
+[Watch the video](https://youtu.be/4NgM59sO4DM)
+
 ## Fonctionnalités Principales
 
 1. **Authentification JWT** : 
