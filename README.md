@@ -8,7 +8,7 @@ L’objectif est de fournir un outil interactif permettant de visualiser, recher
 
 ---
 
-### Here’s a preview of our application:
+### Voici une petite aperçu de notre application: 
 
 [Watch the video](https://youtu.be/4NgM59sO4DM)
 
@@ -64,16 +64,9 @@ Pour assurer un déploiement simple et fiable, nous avons utilisé **Docker** po
 
 Le fichier `docker-compose.yml` gère la coordination des services en définissant les dépendances (par exemple, le backend dépend de PostgreSQL et Elasticsearch). Nous avons également intégré des scripts d’attente (`wait-for-api.sh` et `script.sh`) pour s’assurer que les services critiques, comme la base de données et l’API, sont prêts avant de démarrer les autres conteneurs. Cette orchestration garantit que l’ensemble de l’application peut être lancé avec une seule commande (`docker-compose up`), rendant le processus transparent et reproductible sur n’importe quel environnement.
 
----
+### Test unitaire : 
 
-
-
-
-
-
-
-
-
+Pour finir ce projet, nous avons décidé d'effectuer des tests unitaires. Malheureusement, nous n'avons pas réussi à faire tous les tests que nous voulions. Il est généralement préférable de réaliser des tests unitaires pendant le développement, mais dans notre cas, nous les avons effectués après la création de l'application. Cependant, nous avons tout de même pu réaliser certains de ces tests, comme celui du login, entre autres.
 
 ## Conclusion
 
