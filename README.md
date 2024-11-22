@@ -22,7 +22,7 @@ L’objectif est de fournir un outil interactif permettant de visualiser, recher
 
 Pour lancer cette application, il faut exécuter les commandes suivantes dans le terminal :
 
-# modifier en partant du git au docker 
+# Modifier en partant du git au docker 
 
 ```bash
 
@@ -158,3 +158,8 @@ pytest test.py
 ## Conclusion
 
 Ce projet met en œuvre une architecture fullstack moderne, avec une attention particulière à la sécurité, à la performance et à l’expérience utilisateur. Grâce à la conteneurisation et à l’orchestration, l’application est prête pour une utilisation professionnelle ou académique. Nous espérons qu’elle reflète notre maîtrise des concepts étudiés tout en offrant une base solide pour des améliorations futures.
+
+![Alt Text](image%20(1).png)
+
+
+
