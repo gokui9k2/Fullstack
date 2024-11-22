@@ -8,18 +8,86 @@ L’objectif est de fournir un outil interactif permettant de visualiser, recher
 
 ---
 
+# Photo d'introduction (à supprimer): 
+
+![Alt Text](Image/Interface.png)
+
+## Sommaire 
+
+### 1.  Guide Utilisateur
+### 2. Informations Utiles à la compréhension du DashBoard
+### 3. Aperçu de notre application
+### 4. Fonctionnalités Principales
+### 5. Technologies Utilisées
+
 ## Guide Utilisateur
 
 Pour lancer cette application, il faut exécuter les commandes suivantes dans le terminal :
+
+# modifier en partant du git au docker 
+
+```bash
+
+git clone https://github.com/gokui9k2/Fullstack.git
+
+```
+
+
 
 ```bash
 docker-compose build
 docker-compose up
 ```
+Une fois ces deux commandes lancées, on peut accéder au dashboard en tapant
+
+```bash
+ http://localhost:5000 
+
+```
+dans le navigateur choisi. 
 
 
 
-### Voici une petite aperçu de notre application: 
+
+L'Ultimate Fighting Championship, communément appelé l'UFC, est la plus grande organisation mondiale de combat libre (Mixed Martial Arts, MMA). Fondée en 1993, l'UFC a radicalement transformé le paysage des sports de combat en offrant une plateforme où les combattants de différentes disciplines martiales peuvent se mesurer dans un environnement sans restriction.
+
+Notre Dashboard illustre la distribution géographique des événements UFC à travers le monde. Il est notable que la majorité de ces événements se concentre sur le continent américain, reflétant les origines de l'organisation. En Europe, en revanche, le nombre d'événements organisés reste limité, probablement en raison des restrictions passées sur ce sport, perçu comme excessivement violent pendant de nombreuses années.
+
+## Informations Utiles à la compréhension du DashBoard
+
+Les combats peuvent se conclurent de diverses manières : on parle de finish en faveur du corner Bleu ou Rouge :
+
+### U-DEC (Unanimous Decision):
+Description: Une décision unanime est rendue par les juges à la fin du combat. Cela signifie que tous les juges sont d'accord sur le vainqueur du combat.
+
+### KO/TKO (Knockout/Technical Knockout):
+Description: Un combattant remporte le combat en mettant son adversaire KO (Knockout) ou en le forçant à abandonner en raison de l'incapacité de continuer (Technical Knockout).
+
+### SUB (Submission):
+Description: La victoire est obtenue par soumission, c'est-à-dire qu'un combattant force son adversaire à abandonner en appliquant une prise de soumission.
+
+### S-DEC (Split Decision):
+Description: Une décision partagée est rendue par les juges. Cela signifie qu'il y a un désaccord entre au moins deux des juges quant au vainqueur du combat.
+
+### M-DEC (Majority Decision):
+Description: Une décision à la majorité est rendue par les juges. Cela signifie qu'une majorité des juges est d'accord sur le vainqueur, mais il peut y avoir un juge en désaccord.
+
+### DQ (Disqualification):
+
+Description: Un combattant est disqualifié, entraînant la victoire de son adversaire. Cela peut être dû à des infractions graves aux règles ou à des comportements inappropriés pendant le combat.
+Il est notable que la majorité des combats se terminent par une décision des juges, soulignant ainsi l'importance de la stratégie et de l'endurance dans ces affrontements.
+Cet histogramme met en évidence les différentes manières de conclure un combat. Il est notable que la majorité des combats se terminent par une décision unanime des juges, soulignant ainsi l'importance de la stratégie et de l'endurance dans ces affrontements.Néanmoins notons que les KOset TKos arrivent en seconde position ce qui est considérable !
+
+### Combats et Kos :
+
+Les combattants sont catégorisés par leurs de frappes significatives (le nombre de coups ayant touché leurs adversaires et ayant un impact.)
+Il devient intéressant d'analyser la répartition moyenne de cette variable dans les différentes catégories.
+
+Il est observable que, dans les catégories de poids plus élevées, les combattants sont moins enclins à esquiver. Ainsi, dans ces catégories, la moyenne de coups significatifs portés est nettement supérieure à celle des catégories de poids léger.
+
+
+
+## Voici une petite aperçu de notre application: 
 
 [Watch the video](https://youtu.be/4NgM59sO4DM)
 
@@ -77,9 +145,9 @@ Le fichier `docker-compose.yml` gère la coordination des services en définissa
 
 ### Test unitaire : 
 
-Pour finir ce projet, nous avons décidé d'effectuer des tests unitaires. Malheureusement, nous n'avons pas réussi à faire tous les tests que nous voulions. Il est généralement préférable de réaliser des tests unitaires pendant le développement, mais dans notre cas, nous les avons effectués après la création de l'application. Cependant, nous avons tout de même pu réaliser certains de ces tests, comme celui du login, entre autres.
+Pour terminer ce projet, nous avons décidé d'effectuer des tests unitaires. Malheureusement, nous n'avons pas réussi à réaliser tous les tests que nous souhaitions. Il est généralement préférable de réaliser des tests unitaires pendant le développement, mais dans notre cas, nous les avons effectués après la création de l'application. Cependant, nous avons tout de même pu réaliser certains de ces tests, comme celui du login, entre autres.
 
-Pour effectuer ces tests, il faut entrer dans le conteneur api comme ceci :
+Pour effectuer ces tests, il faut accéder au conteneur API comme suit :
 
 ```bash
 docker exec -it full_stack-api-1 /bin/sh
